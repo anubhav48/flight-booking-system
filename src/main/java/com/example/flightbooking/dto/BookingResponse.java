@@ -1,13 +1,15 @@
 package com.example.flightbooking.dto;
 
+import com.example.flightbooking.model.BookingStatus;
+
 public class BookingResponse {
     private final String bookingId;
     private final String flightNumber;
     private final String passengerName;
     private final int seatsBooked;
-    private final String status;
+    private final BookingStatus status;
 
-    public BookingResponse(String bookingId, String flightNumber, String passengerName, int seatsBooked, String status) {
+    public BookingResponse(String bookingId, String flightNumber, String passengerName, int seatsBooked, BookingStatus status) {
         this.bookingId = bookingId;
         this.flightNumber = flightNumber;
         this.passengerName = passengerName;
@@ -19,5 +21,5 @@ public class BookingResponse {
     public String getFlightNumber() { return flightNumber; }
     public String getPassengerName() { return passengerName; }
     public int getSeatsBooked() { return seatsBooked; }
-    public String getStatus() { return status; }
+    public BookingStatus getStatus() { return status; }
 }

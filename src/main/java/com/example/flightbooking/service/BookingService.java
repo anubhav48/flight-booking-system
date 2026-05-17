@@ -2,6 +2,7 @@ package com.example.flightbooking.service;
 
 import com.example.flightbooking.dto.BookingRequest;
 import com.example.flightbooking.dto.BookingResponse;
+import com.example.flightbooking.model.BookingStatus;
 import com.example.flightbooking.model.Flight;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +45,7 @@ public class BookingService {
                 flight.getFlightNumber(),
                 request.getPassengerName(),
                 request.getSeatsRequested(),
-                "CONFIRMED"
+                BookingStatus.CONFIRMED
         );
     }
 }
