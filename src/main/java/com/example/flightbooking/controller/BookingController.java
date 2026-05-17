@@ -2,9 +2,8 @@ package com.example.flightbooking.controller;
 
 import com.example.flightbooking.dto.BookingRequest;
 import com.example.flightbooking.dto.BookingResponse;
+import com.example.flightbooking.model.BookingStatus;
 import com.example.flightbooking.service.BookingService;
-import com.example.flightbooking.service.FlightNotFoundException;
-import com.example.flightbooking.service.FlightOverbookedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,16 +21,14 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<BookingResponse> createBooking(@RequestBody BookingRequest request) {
         BookingResponse response = bookingService.processBooking(request);
+
+        // If the business logic set the status to FAILED, return 400 Bad Request
+        if (response.getStatus() == BookingStatus.FAILED) {
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); 
+            // Alternative: HttpStatus.UNPROCESSABLE_ENTITY (422) is also a great choice here
+        }
+
+        // Otherwise, return 201 Created for a successful booking
         return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
-
-    @ExceptionHandler(FlightNotFoundException.class)
-    public ResponseEntity<String> handleNotFound(FlightNotFoundException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler({FlightOverbookedException.class, IllegalArgumentException.class})
-    public ResponseEntity<String> handleConflictOrBadRequest(RuntimeException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
