@@ -4,8 +4,10 @@ import com.example.flightbooking.dto.BookingRequest;
 import com.example.flightbooking.dto.BookingResponse;
 import com.example.flightbooking.model.BookingStatus;
 import com.example.flightbooking.service.BookingService;
+import jakarta.validation.Valid; // Import Valid
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,16 +21,26 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<BookingResponse> createBooking(@RequestBody BookingRequest request) {
+    public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody BookingRequest request) {
         BookingResponse response = bookingService.processBooking(request);
 
-        // If the business logic set the status to FAILED, return 400 Bad Request
         if (response.getStatus() == BookingStatus.FAILED) {
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); 
-            // Alternative: HttpStatus.UNPROCESSABLE_ENTITY (422) is also a great choice here
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        // Otherwise, return 201 Created for a successful booking
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Optional: Intercept Jakarta validation errors nicely
+     * If a validation fails, return a 400 Bad Request with the custom validation messages.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        StringBuilder errorMessage = new StringBuilder("Validation Failed: ");
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            errorMessage.append(error.getDefaultMessage()).append(" ");
+        });
+        return new ResponseEntity<>(errorMessage.toString().trim(), HttpStatus.BAD_REQUEST);
     }
 }
