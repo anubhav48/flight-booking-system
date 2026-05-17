@@ -24,26 +24,39 @@ public class BookingService {
     public BookingResponse processBooking(BookingRequest request) {
         Flight flight = flightInventory.get(request.getFlightNumber());
 
-        // Flight not found path
-        if (flight == null || request.getSeatsRequested() <= 0) {
-            return new BookingResponse(null, request.getFlightNumber(), request.getPassengerName(), 0, BookingStatus.FAILED);
+        // Fail-state 1: Flight does not exist
+        if (flight == null) {
+            throw new FlightNotFoundException(
+                    "Error: Flight " + request.getFlightNumber() + " does not exist.",
+                    request.getFlightNumber(),
+                    request.getPassengerName()
+            );
         }
 
-        // Atomic seat reduction check
+        // Fail-state 2: Guardrail check for seat counts
+        if (request.getSeatsRequested() <= 0) {
+            throw new IllegalArgumentException("Error: Seats requested must be greater than zero.");
+        }
+
         boolean success = flight.bookSeats(request.getSeatsRequested());
 
-        // Overbooked/Insufficient seats path
+        // Fail-state 3: Overbooked flight
         if (!success) {
-            return new BookingResponse(null, flight.getFlightNumber(), request.getPassengerName(), 0, BookingStatus.FAILED);
+            throw new FlightOverbookedException(
+                    "Error: Not enough seats available on flight " + request.getFlightNumber(),
+                    flight.getFlightNumber(),
+                    request.getPassengerName()
+            );
         }
 
-        // Success path
+        // Success Path
         return new BookingResponse(
                 UUID.randomUUID().toString(),
                 flight.getFlightNumber(),
                 request.getPassengerName(),
                 request.getSeatsRequested(),
-                BookingStatus.CONFIRMED
+                BookingStatus.CONFIRMED,
+                "Booking confirmed successfully!"
         );
     }
 }

@@ -14,7 +14,6 @@ public class BookingRequest {
     @Positive(message = "Seats requested must be a positive number greater than zero.")
     private int seatsRequested;
 
-    // Getters and Setters
     public String getFlightNumber() { return flightNumber; }
     public void setFlightNumber(String flightNumber) { this.flightNumber = flightNumber; }
     public String getPassengerName() { return passengerName; }
